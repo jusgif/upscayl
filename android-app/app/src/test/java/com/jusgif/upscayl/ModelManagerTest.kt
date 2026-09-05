@@ -20,6 +20,8 @@ class ModelManagerTest {
     }
 
     @Test fun inferenceTileIsAtLeastNcnnMinimum() {
-        assertTrue(256 >= 32)
+        val tile = 256
+        assertTrue(tile >= 32)
+        assertEquals(256, 32 * 8)
     }
 }
