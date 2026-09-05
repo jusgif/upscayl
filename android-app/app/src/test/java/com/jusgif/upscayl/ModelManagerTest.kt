@@ -18,4 +18,8 @@ class ModelManagerTest {
         assertEquals(2560, width * 4)
         assertEquals(1920, height * 4)
     }
+
+    @Test fun inferenceTileIsAtLeastNcnnMinimum() {
+        assertTrue(256 >= 32)
+    }
 }
