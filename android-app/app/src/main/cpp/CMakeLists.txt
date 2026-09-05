@@ -1,0 +1,7 @@
+cmake_minimum_required(VERSION 3.22.1)
+project(upscayl_native)
+set(CMAKE_CXX_STANDARD 17)
+set(NCNN_DIR "${CMAKE_CURRENT_LIST_DIR}/../prebuilt/${ANDROID_ABI}/lib/cmake/ncnn" CACHE PATH "ncnn CMake package")
+find_package(ncnn REQUIRED)
+add_library(upscayl_native SHARED native_upscaler.cpp)
+target_link_libraries(upscayl_native ncnn android log)
