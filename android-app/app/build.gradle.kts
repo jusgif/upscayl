@@ -16,7 +16,7 @@ android {
         versionName = "0.1.0"
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
         ndk {
-            // Ship every common Android ABI so native loading does not fail on 32-bit ARM/x86 devices.
+            // Build only ABIs for which the checked-in NCNN Android Vulkan package is available.
             abiFilters += listOf("armeabi-v7a", "arm64-v8a", "x86", "x86_64")
         }
     }
