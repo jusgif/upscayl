@@ -18,7 +18,7 @@ jobs:
         working-directory: android-app
     steps:
       - uses: actions/checkout@v4
-      - uses: actions/setup-java@v4
+      - uses: actions/setup-java@v5
         with:
           distribution: temurin
           java-version: '17'
@@ -33,6 +33,14 @@ jobs:
           sdkmanager "platforms;android-35" "build-tools;35.0.0" "cmake;3.22.1" "ndk;29.0.14206865"
       - name: Fetch NCNN Vulkan package
         run: bash ./scripts/fetch-ncnn.sh
+      - name: Verify native ABI inputs
+        run: |
+          echo "Checking NCNN Android Vulkan package layout..."
+          find app/src/main/prebuilt -maxdepth 3 -type d | sort
+          if find app/src/main/prebuilt -type d \( -name armeabi -o -name mips -o -name mips64 \) | grep -q .; then
+            echo "Unsupported legacy ABI directory found in NCNN package"
+            exit 1
+          fi
       - name: Install Gradle
         uses: gradle/actions/setup-gradle@v4
         with:
