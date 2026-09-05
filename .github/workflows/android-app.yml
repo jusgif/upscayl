@@ -1,4 +1,4 @@
-name: Android App CI
+name: Upscayl Android CI
 on:
   push:
     branches: [ main, android-app ]
@@ -39,8 +39,15 @@ jobs:
         run: gradle testDebugUnitTest --no-daemon
       - name: Assemble debug APK
         run: gradle assembleDebug --no-daemon
-      - name: Upload APK
+      - name: Assemble release APK
+        run: gradle assembleRelease --no-daemon
+      - name: Upload debug APK
         uses: actions/upload-artifact@v4
         with:
           name: upscayl-debug-apk
-          path: android-app/app/build/outputs/apk/debug/app-debug.apk
+          path: android-app/app/build/outputs/apk/debug/*.apk
+      - name: Upload release APK
+        uses: actions/upload-artifact@v4
+        with:
+          name: upscayl-release-apk
+          path: android-app/app/build/outputs/apk/release/*.apk
