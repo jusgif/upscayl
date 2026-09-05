@@ -16,7 +16,8 @@ android {
         versionName = "0.1.0"
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
         ndk {
-            // Build only ABIs for which the checked-in NCNN Android Vulkan package is available.
+            // Only build/package ABIs supported by the Android NDK and NCNN package.
+            abiFilters.clear()
             abiFilters += listOf("armeabi-v7a", "arm64-v8a", "x86", "x86_64")
         }
     }
@@ -29,10 +30,13 @@ android {
         }
     }
 
-    // Also produce a universal APK for simple sideloading and ABI diagnostics.
+    // AGP can retain legacy ABI defaults in AbiSplit. Reset them explicitly before
+    // selecting the four ABIs supported by the current Android NDK.
     splits {
         abi {
             isEnable = true
+            reset()
+            include("armeabi-v7a", "arm64-v8a", "x86", "x86_64")
             isUniversalApk = true
         }
     }
