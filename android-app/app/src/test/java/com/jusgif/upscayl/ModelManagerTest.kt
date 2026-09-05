@@ -15,6 +15,7 @@ class ModelManagerTest {
         val height = 480
         assertEquals(1280, width * 2)
         assertEquals(1920, width * 3)
+        assertEquals(2560, width * 4)
         assertEquals(1920, height * 4)
     }
 }
