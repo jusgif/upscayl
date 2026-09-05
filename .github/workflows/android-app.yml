@@ -1,7 +1,7 @@
 name: Android App CI
 on:
   push:
-    branches: [ android-app ]
+    branches: [ main, android-app ]
     paths:
       - 'android-app/**'
       - '.github/workflows/android-app.yml'
