@@ -1,53 +1,42 @@
 name: Build for Windows
 
 on:
+  push:
+    branches: [ "main" ]
   workflow_dispatch:
 
-jobs:
-  windows:
-    runs-on: windows-latest
-    env:
-      GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-    steps:
-      - uses: actions/checkout@v3
+permissions:
+  contents: read
 
-      - uses: actions/setup-node@v3.5.0
+jobs:
+  build:
+    runs-on: windows-latest
+
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+        with:
+          lfs: true
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
         with:
           node-version: 18
+          cache: npm
 
-      - name: Install Modules and Build
-        run: |
-          npm install
-          npm run dist:win
+      - name: Install Dependencies
+        run: npm ci
 
-      # Get the latest release
-      - name: Get Latest Release
-        id: get_latest_release
-        uses: actions/github-script@v6
+      - name: Build Windows App
+        run: npm run dist:win
+
+      - name: Upload Windows App Artifacts
+        uses: actions/upload-artifact@v4
         with:
-          script: |
-            const latestRelease = await github.rest.repos.getLatestRelease({
-              owner: context.repo.owner,
-              repo: context.repo.repo
-            });
-            core.setOutput('release_id', latestRelease.data.id);
-
-      - name: Upload Assets to Release
-        uses: svenstaro/upload-release-action@v2
-        with:
-          repo_token: ${{ secrets.GITHUB_TOKEN }}
-          file: |
-            dist/*.blockmap
-            dist/*.zip
-            dist/*.exe
-            dist/*.yml
-
-      - name: Upload Windows Build
-        uses: actions/upload-artifact@v3
-        with:
-          name: windows-build
+          name: upscayl-windows-build
           path: |
-            dist/*.blockmap
-            dist/*.zip
             dist/*.exe
+            dist/*.zip
+            dist/*.blockmap
             dist/*.yml
+          if-no-files-found: error
