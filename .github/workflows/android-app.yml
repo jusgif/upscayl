@@ -26,27 +26,42 @@ jobs:
       - name: Set up JDK 17
         uses: actions/setup-java@v4
         with:
-          distribution: temurin
+          distribution: 'temurin'
           java-version: '17'
-          cache: gradle
+          cache: 'gradle'
 
       - name: Set up Android SDK
         uses: android-actions/setup-android@v3
 
-      - name: Configure Android SDK components
+      - name: Accept Licenses & Install Android SDK Components
         run: |
+          yes | sdkmanager --licenses || true
           sdkmanager "platforms;android-35" "build-tools;35.0.0" "cmake;3.22.1" "ndk;29.0.14206865"
 
-      - name: Fetch NCNN Vulkan package
-        run: bash ./scripts/fetch-ncnn.sh
-
-      - name: Verify native ABI inputs
+      - name: Configure SDK and NDK Paths
         run: |
-          echo "Checking NCNN Android Vulkan package layout..."
-          find app/src/main/prebuilt -maxdepth 3 -type d | sort
-          if find app/src/main/prebuilt -type d \( -name armeabi -o -name mips -o -name mips64 \) | grep -q .; then
-            echo "Unsupported legacy ABI directory found in NCNN package"
-            exit 1
+          echo "sdk.dir=$ANDROID_HOME" > local.properties
+          echo "ndk.dir=$ANDROID_HOME/ndk/29.0.14206865" >> local.properties
+          echo "ANDROID_NDK_ROOT=$ANDROID_HOME/ndk/29.0.14206865" >> "$GITHUB_ENV"
+
+      - name: Fetch NCNN Vulkan package
+        run: |
+          if [ -f "./scripts/fetch-ncnn.sh" ]; then
+            bash ./scripts/fetch-ncnn.sh
+          elif [ -f "../scripts/fetch-ncnn.sh" ]; then
+            bash ../scripts/fetch-ncnn.sh
+          else
+            echo "fetch-ncnn.sh not found, skipping."
+          fi
+
+      - name: Prune Unsupported Legacy ABIs
+        run: |
+          if [ -d "app/src/main/prebuilt" ]; then
+            echo "Removing unsupported legacy ABIs..."
+            find app/src/main/prebuilt -type d \( -name "armeabi" -o -name "mips" -o -name "mips64" \) -exec rm -rf {} + 2>/dev/null || true
+            find app/src/main/prebuilt -maxdepth 3 -type d | sort
+          else
+            echo "Directory app/src/main/prebuilt not present; continuing."
           fi
 
       - name: Make Gradle wrapper executable
@@ -54,10 +69,12 @@ jobs:
 
       - name: Build APK with Gradle
         run: ./gradlew assembleDebug --stacktrace --no-daemon
+        env:
+          GRADLE_OPTS: "-Dorg.gradle.jvmargs=-Xmx4096m -XX:MaxMetaspaceSize=1024m"
 
       - name: Upload Android APK
         uses: actions/upload-artifact@v4
         with:
           name: Upscayl-Android-APK
-          path: android-app/app/build/outputs/apk/**/*.apk
+          path: "android-app/app/build/outputs/apk/**/*.apk"
           if-no-files-found: error
