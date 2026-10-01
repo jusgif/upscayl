@@ -1,0 +1,20 @@
+{
+  "name": "upscayl-mobile",
+  "private": true,
+  "version": "1.0.0",
+  "scripts": {
+    "cap:add": "cap add android",
+    "cap:sync": "cap sync android",
+    "build": "npm run cap:sync",
+    "open": "cap open android"
+  },
+  "dependencies": {
+    "@capacitor/android": "^7.4.0",
+    "@capacitor/core": "^7.4.0",
+    "@capacitor/filesystem": "^7.0.0",
+    "@capacitor/share": "^7.0.0"
+  },
+  "devDependencies": {
+    "@capacitor/cli": "^7.4.0"
+  }
+}
